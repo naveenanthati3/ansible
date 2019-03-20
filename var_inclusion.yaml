@@ -1,0 +1,30 @@
+---
+- name: deploy and start apache
+  hosts: all
+  vars:
+    apache_package: apache2
+    firewall_package: ufw
+    web_service: apache2
+    firewall_service: ufw
+    rule: apache2
+  tasks:
+  - name: install and update packages
+    apt:
+      name:
+        - "{{ apache_pacakage }}"
+        - "{{ firewall_pacakage }}"
+      state: latest
+  - name: start and enable {{ firewall_pacakage }}
+    service:
+      name: "{{ firewall_pacakage }}"
+      enabled: true
+      state: started
+  - name: create web content
+    copy:
+      content: "welcome to ansible managed web service"
+      dest: /var/www/html/index.html
+  - name: start and enable {{ web_service }}
+    service:
+    name: "{{ web_service }}
+    enabled: true
+    state: started
