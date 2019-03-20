@@ -35,7 +35,7 @@
         immediate: true
         state: enabled
 - name: verify web browser
-  host: localhost
+  hosts: localhost
   become: false
   tasks:
     - name: test the web server is available
