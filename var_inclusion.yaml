@@ -8,23 +8,39 @@
     firewall_service: ufw
     rule: apache2
   tasks:
-  - name: install and update packages
-    apt:
-      name:
-        - "{{ apache_pacakage }}"
-        - "{{ firewall_pacakage }}"
-      state: latest
-  - name: start and enable {{ firewall_pacakage }}
-    service:
-      name: "{{ firewall_pacakage }}"
-      enabled: true
-      state: started
-  - name: create web content
-    copy:
-      content: "welcome to ansible managed web service"
-      dest: /var/www/html/index.html
-  - name: start and enable {{ web_service }}
-    service:
-    name: "{{ web_service }}
-    enabled: true
-    state: started
+    - name: install and update packages
+      apt:
+        name:
+          - "{{ apache_pacakage }}"
+          - "{{ firewall_pacakage }}"
+        state: latest
+    - name: start and enable {{ firewall_pacakage }}
+      service:
+        name: "{{ firewall_pacakage }}"
+        enabled: true
+        state: started
+    - name: create web content
+      copy:
+        content: "welcome to ansible managed web service"
+        dest: /var/www/html/index.html
+    - name: start and enable {{ web_service }}
+      service:
+        name: "{{ web_service }}
+        enabled: true
+        state: started
+    - name: open firewall for {{ rule }}
+      ufw:
+        service: "{{ rule }}"
+        permanent: true
+        immediate: true
+        state: enabled
+- name: verify web browser
+  host: localhost
+  become: false
+  tasks:
+    - name: test the web server is available
+      uri:
+        url: http://localhost.com
+        status_code: 200
+  
+        
