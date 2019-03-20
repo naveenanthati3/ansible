@@ -11,12 +11,12 @@
     - name: install and update packages
       apt:
         name:
-          - "{{ apache_pacakage }}"
-          - "{{ firewall_pacakage }}"
+          - "{{ apache_package }}"
+          - "{{ firewall_package }}"
         state: latest
-    - name: start and enable {{ firewall_pacakage }}
+    - name: start and enable {{ firewall_package }}
       service:
-        name: "{{ firewall_pacakage }}"
+        name: "{{ firewall_package }}"
         enabled: true
         state: started
     - name: create web content
