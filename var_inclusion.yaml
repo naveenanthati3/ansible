@@ -25,7 +25,7 @@
         dest: /var/www/html/index.html
     - name: start and enable {{ web_service }}
       service:
-        name: "{{ web_service }}
+        name: "{{ web_service }}"
         enabled: true
         state: started
     - name: open firewall for {{ rule }}
