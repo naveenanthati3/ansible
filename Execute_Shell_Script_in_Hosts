@@ -2,7 +2,7 @@
 - name: Transfer and execute a script.
   hosts: all
   become: yes
-  become_user: naveen
+  become_user: username
   tasks:
      - name: Transfer the script
        copy: src=file_name.sh dest=/home/ mode=0777
