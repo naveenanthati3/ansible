@@ -1,0 +1,39 @@
+- name: Clone Source Code from GitHub
+  git:
+    repo: https://{{ githubuser | urlencode }}:{{ githubpassword | urlencode }}@github.com/ramtulluri/video-ai-analyser.git
+    dest: /tmp/github
+    version: fd_integ
+- name: Update System
+  become: yes
+  command: apt update
+- name: Install Components of Python & Python Env
+  become: yes
+  action: >
+    {{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes
+  with_items:
+    - python3-dev
+    - build-essential
+    - libssl-dev
+    - libffi-dev
+    - python3-setuptools
+    - python3-venv
+- name: Creating Directory
+  become: yes
+  command: mkdir -p /home/python/myproj1
+- name: Creating Virtual Env with Python
+  become: yes
+  command: chdir=/home/python/myproj1 {{ item }}
+  with_items:
+  - python3.6 -m venv myprojectenv
+- name: Copy Source Code from tmp
+  become: yes
+  command: cp -r /tmp/github/. /home/python/myproj1/
+- name: Installing flask,gunicorn & wheel
+  pip:
+    name: wheel,gunicorn,flask
+    executable: pip3
+- name: Copy Rest Server file
+  become: yes
+  copy:
+    src: /home/administrator/ai_rest_server.py
+    dest: /home/python/myproj1/object_detection

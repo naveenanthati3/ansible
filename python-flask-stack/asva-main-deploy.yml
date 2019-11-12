@@ -1,0 +1,27 @@
+- hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: false
+  pre_tasks:
+  - name: Copy Requirements.txt to Slave
+    copy:
+      src: /home/administrator/Requirements.txt
+      dest: /home/python/Requirements.txt
+  - name: Install pip3
+    command: apt install -y python3-pip
+  - name: Install Cmake
+    command: apt install -y cmake
+  - name: Install dependent pip packages
+    pip:
+      requirements: /home/python/Requirements.txt
+      executable: pip3
+- hosts: restservers
+  roles:
+    - countcode
+  vars_prompt:
+    - name: "githubuser"
+      prompt: "Enter your github username"
+      private: no
+    - name: "githubpassword"
+      prompt: "Enter your github password"
+      private: yes
