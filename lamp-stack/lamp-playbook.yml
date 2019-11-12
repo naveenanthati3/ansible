@@ -1,0 +1,17 @@
+- hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: false
+  pre_tasks:
+  - name: Install python2 for Ansible
+    raw: apt-get install python-minimal -y
+    register: system_output
+- hosts: webservers
+  roles:
+    - apache2
+    - php-fpm
+- hosts: dbservers
+  roles:
+    - mysql
+  vars:
+    mysql_root_password: "mypass"
