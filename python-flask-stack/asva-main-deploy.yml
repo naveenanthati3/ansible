@@ -1,21 +1,28 @@
+---
+
 - hosts: all
   become: true
   become_method: sudo
   gather_facts: false
+  vars_files:
+    - vars/var.yml
   pre_tasks:
-  - name: Copy Requirements.txt to Slave
-    copy:
-      src: /home/administrator/Requirements.txt
-      dest: /home/python/Requirements.txt
   - name: Install pip3
-    command: apt install -y python3-pip
+    apt:
+      name: "{{ python_pip }}"
+      state: present
   - name: Install Cmake
-    command: apt install -y cmake
+    apt:
+      name: "{{ req_cmake_name }}"
+      state: present
+      update_cache: yes
   - name: Install dependent pip packages
     pip:
-      requirements: /home/python/Requirements.txt
+      name: "{{ req_pip_pack }}"
       executable: pip3
 - hosts: restservers
+  vars_files:
+    - vars/var.yml
   roles:
     - countcode
   vars_prompt:

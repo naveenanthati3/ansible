@@ -8,32 +8,43 @@
   command: apt update
 - name: Install Components of Python & Python Env
   become: yes
-  action: >
-    {{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes
-  with_items:
-    - python3-dev
-    - build-essential
-    - libssl-dev
-    - libffi-dev
-    - python3-setuptools
-    - python3-venv
+  apt:
+    name: "{{ req_pyth_name }}"
+    state: present
 - name: Creating Directory
   become: yes
-  command: mkdir -p /home/python/myproj1
+  command: mkdir -p /home/python/myproj
 - name: Creating Virtual Env with Python
   become: yes
-  command: chdir=/home/python/myproj1 {{ item }}
+  command: chdir=/home/python/myproj {{ item }}
   with_items:
   - python3.6 -m venv myprojectenv
-- name: Copy Source Code from tmp
-  become: yes
-  command: cp -r /tmp/github/. /home/python/myproj1/
-- name: Installing flask,gunicorn & wheel
+# - name: Copy Source Code from tmp
+#   become: yes
+#   command: cp -r /tmp/github/. /home/python/myproj/
+- name: Installing flask application dependents
   pip:
-    name: wheel,gunicorn,flask
-    executable: pip3
+    name: "{{ req_flask_pip }}"
+    executable: pip
 - name: Copy Rest Server file
   become: yes
   copy:
-    src: /home/administrator/ai_rest_server.py
-    dest: /home/python/myproj1/object_detection
+    src: /home/administrator/ansibleproj/{{ item }}
+    dest: /home/python/myproj
+  with_items:
+  - ansibleproj.py
+  - wsgi.py
+- name: Create Service File
+  become: yes
+  copy:
+    src: /home/administrator/ansibleproj/ansproj.service
+    dest: /etc/systemd/system
+- name: Daemon Reload
+  become: yes
+  command: systemctl daemon-reload
+- name: Start the Count Service
+  become: yes
+  systemd:
+    state: started
+    name: ansproj
+
