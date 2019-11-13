@@ -13,12 +13,12 @@
     state: present
 - name: Creating Directory
   become: yes
-  command: mkdir -p /home/python/myproj
+  command: mkdir -p "{{ proj_dir }}"
 - name: Creating Virtual Env with Python
   become: yes
-  command: chdir=/home/python/myproj {{ item }}
+  command: chdir="{{ proj_dir }}" {{ item }}
   with_items:
-  - python3.6 -m venv myprojectenv
+  - python3.6 -m venv "{{ proj_venv_name }}"
 # - name: Copy Source Code from tmp
 #   become: yes
 #   command: cp -r /tmp/github/. /home/python/myproj/
@@ -30,7 +30,7 @@
   become: yes
   copy:
     src: /home/administrator/ansibleproj/{{ item }}
-    dest: /home/python/myproj
+    dest: "{{ proj_dir }}"
   with_items:
   - ansibleproj.py
   - wsgi.py

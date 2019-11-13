@@ -1,13 +1,3 @@
----
-python_pip: python3-pip
-req_cmake_name: cmake
-req_pyth_name:
-- python3-dev
-- build-essential
-- libssl-dev
-- libffi-dev
-- python3-setuptools
-- python3-venv
 req_pip_pack:
 - opencv-contrib-python==3.4.0.12
 - pandas==0.25.1
