@@ -1,0 +1,70 @@
+---
+# tasks file for cron-monit
+- name: Create Directory to clone code
+  become: yes
+  file:
+    path: /opt/cron-monit
+    state: directory
+    mode: '777'
+
+- name: Clone Source Code from GitHub
+  git:
+    repo: https://{{ githubuser | urlencode }}:{{ githubpassword | urlencode }}@github.com/naveenanthati3/asva-ops.git
+    dest: /opt/cron-monit
+    force: yes
+    version: "{{ SCRIPT_BRANCH }}"
+
+- name: Creat Cron Job
+  become: yes
+  shell: |
+    cat <<EOF > /opt/cron-monit/scripts/s3_upload
+    #!/bin/bash
+    SHELL=/bin/bash
+    PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+    * * * * *   root  /usr/bin/s3cmd -c ~/.s3cfg sync --exclude "*" --include "*.meta" --include "*dummy_*.mp4"  /opt/{{ INPUT}}_{{ EID[19:24] }}/output/ s3://{{ BK_NAME }}/{{ FOLD_NAME }}/
+    * * * * *   root  /usr/bin/s3cmd -c ~/.s3cfg sync  /opt/{{ INPUT}}_{{ EID[19:24] }}/video_out/ s3://{{ BK_NAME }}/{{ FOLD_NAME }}/
+    * 1 * * *   root rm -f \$(find /opt/{{ INPUT}}_{{ EID[19:24] }}/video_out/ -type f -mmin +120)
+    0 0 * * *   root find /opt/{{ INPUT}}_{{ EID[19:24] }}/output -mtime +1 | xargs  tar -czvPf  /opt/{{ INPUT}}_{{ EID[19:24] }}/archives/\$(date +%F --date="1 days ago").tar.gz
+    0 0 * * *   root rm -f \$(find /opt/{{ INPUT}}_{{ EID[19:24] }}/output -type f -mtime +2)
+    0 0 28 * *  root rm -f \$(find /opt/{{ INPUT}}_{{ EID[19:24] }}/archives/ -type f -mtime +90)
+    * * * * *   root touch /tmp/check_cron
+    EOF
+
+- name: Add Project path to Monit Files
+  replace:
+    path: "{{ item }}"
+    regexp: 'motion_detection'
+    replace: '{{ INPUT}}_{{ EID[19:24] }}'
+  with_items:
+    - /opt/cron-monit/scripts/convert
+    - /opt/cron-monit/scripts/asva
+    - /opt/cron-monit/scripts/convert.sh
+    - /opt/cron-monit/scripts/convert_service.sh
+    - /opt/cron-monit/scripts/asva_service.sh
+
+- name: Add Mail Id for Edge Machine Alerts
+  replace:
+    path: "{{ item }}"
+    regexp: 'recipient@gmail.com'
+    replace: '{{ RECV_MAILID }}'
+  with_items:
+    - /opt/cron-monit/scripts/convert
+    - /opt/cron-monit/scripts/asva
+    - /opt/cron-monit/scripts/mail-server-recipients
+
+- name: Renaming the Convert Service in Monit Files
+  replace:
+    path: "{{ item }}"
+    regexp: 'convert'
+    replace: '{{ INPUT}}_{{ EID[19:24] }}_convert'
+  with_items:
+    - /opt/cron-monit/scripts/convert
+    - /opt/cron-monit/scripts/convert_service.sh
+
+- name: Renaming the ASVA Service in Monit Files
+  replace:
+    path: "{{ item }}"
+    regexp: 'asva'
+    replace: '{{ INPUT}}_{{ EID[19:24] }}'
+  with_items:
+    - /opt/cron-monit/scripts/asva

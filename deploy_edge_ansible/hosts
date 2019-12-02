@@ -1,0 +1,6 @@
+[webservers]
+#192.168.1.222 ansible_ssh_user=root ansible_python_interpreter=/usr/bin/python3
+192.168.1.186 ansible_ssh_user=root ansible_python_interpreter=/usr/bin/python3
+
+#[dbservers]
+#192.168.1.199 ansible_ssh_user=mysql ansible_python_interpreter=/usr/bin/python3

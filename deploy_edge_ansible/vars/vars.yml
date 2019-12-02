@@ -1,0 +1,23 @@
+---
+INPUT: stream
+EID: 5d958958cd92521c5115d97e
+SID: 5d95895bcd92521c5115d986
+EDID: 5dbc039606e792a62abb661c
+BRANCH: code_refractor
+SCRIPT_BRANCH: naveen_script_update
+URL: https://ijx4y5usa8.execute-api.us-east-1.amazonaws.com/dev/
+req_packs:
+- git
+- s3cmd
+- python3-pip
+- inotify-tools
+- libsm6
+- libxext6
+- libxrender-dev
+- ffmpeg
+- screen
+- monit
+- jsbeautifier
+BK_NAME: client1asva
+FOLD_NAME: inbox
+RECV_MAILID: naveen@gmail.com

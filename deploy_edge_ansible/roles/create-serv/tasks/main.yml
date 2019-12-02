@@ -1,0 +1,90 @@
+---
+# tasks file for create-serv
+- name: Rename ASVA pid
+  replace:
+    path: "{{ item }}"
+    regexp: 'asva.pid'
+    replace: '{{ INPUT}}_{{ EID[19:24] }}.pid'
+  with_items:
+    - /opt/cron-monit/scripts/asva_service.sh
+
+- name: Add Project path to ASVA Service
+  replace:
+    path: "{{ item }}"
+    regexp: '/asva'
+    replace: '/asva_{{ INPUT}}_{{ EID[19:24] }}'
+  with_items:
+    - /opt/cron-monit/scripts/asva_service.sh
+
+- name: Add type if Input
+  replace:
+    path: "{{ item }}"
+    regexp: 'stream'
+    replace: '{{ INPUT}}'
+  with_items:
+    - /opt/cron-monit/scripts/asva_service.sh
+
+- name: Add Project path to ASVA Service
+  replace:
+    path: "{{ item }}"
+    regexp: '=asva'
+    replace: '={{ INPUT}}_{{ EID[19:24] }}'
+  with_items:
+    - /opt/cron-monit/scripts/asva_service.sh
+
+- name: Configuring Convert Service
+  become: yes
+  copy:
+    src: /opt/cron-monit/scripts/convert.sh
+    dest: /usr/sbin/{{ INPUT}}_{{ EID[19:24] }}_convert
+    remote_src: yes
+    mode: a+x
+
+- name: Copy cron file to Crontab
+  become: yes
+  copy:
+    src: /opt/cron-monit/scripts/s3_upload
+    dest: /etc/cron.d/s3_upload_{{ INPUT}}_{{ EID[19:24] }}
+    remote_src: yes
+
+- name: Creating Convert Service
+  become: yes
+  copy:
+    src: /opt/cron-monit/scripts/convert_service.sh
+    dest: /etc/init.d/{{ INPUT}}_{{ EID[19:24] }}_convert
+    remote_src: yes
+    mode: '755'
+
+- name: Creating ASVA Service
+  become: yes
+  copy:
+    src: /opt/cron-monit/scripts/asva_service.sh
+    dest: /etc/init.d/{{ INPUT}}_{{ EID[19:24] }}
+    remote_src: yes
+    mode: '755'
+
+- name: Configuring Monit Services
+  become: yes
+  copy:
+    src: "{{ item }}"
+    dest: /etc/monit/conf.d/
+    remote_src: yes
+  with_items:
+    - /opt/cron-monit/scripts/check-cronjob
+    - /opt/cron-monit/scripts/system-stats
+    - /opt/cron-monit/scripts/mail-server-recipients
+    - /opt/cron-monit/scripts/monit_access
+
+- name: Configuring Convert Service to Monit
+  become: yes
+  copy:
+    src: /opt/cron-monit/scripts/convert
+    dest: /etc/monit/conf.d/{{ INPUT}}_{{ EID[19:24] }}_convert
+    remote_src: yes
+
+- name: Configuring ASVA Service to Monit
+  become: yes
+  copy:
+    src: /opt/cron-monit/scripts/asva
+    dest: /etc/monit/conf.d/{{ INPUT}}_{{ EID[19:24] }}_convert
+    remote_src: yes

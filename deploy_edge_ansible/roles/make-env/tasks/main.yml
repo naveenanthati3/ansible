@@ -1,0 +1,31 @@
+---
+# tasks file for make-env
+- name: Trim EID
+  debug: 
+    msg="{{ EID[19:24] }}"
+
+- name: Create Directory to clone code
+  become: yes
+  file:
+    path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}
+    state: directory
+    mode: '777'
+- name: Clone Source Code from GitHub
+  git:
+    repo: https://{{ githubuser | urlencode }}:{{ githubpassword | urlencode }}@github.com/ramtulluri/asva-edge.git
+    dest: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}
+    force: yes
+    version: "{{ BRANCH }}"
+- name: Install pip packages
+  become: yes
+  pip:
+    requirements: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/requirements.txt
+    executable: pip3
+- name: Add S3 Credentials
+  template: >
+    src=../templates/s3cfg.j2
+    dest=~/.s3cfg
+    mode=600
+- name: Check Bucket Status
+  shell: s3cmd ls s3://{{ BK_NAME }}
+  register: result

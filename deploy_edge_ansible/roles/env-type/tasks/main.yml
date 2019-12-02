@@ -1,0 +1,16 @@
+---
+# tasks file for env-typr
+- name: Get JSON file from MongoDB
+  become: yes
+  command: curl --header "Content-Type{{ ":" }} application/json" \
+           --request POST \
+           --data '{"enterpriseId"{{ ":" }}"{{ EID }}","siteId"{{ ":" }}"{{ SID }}","edgeId"{{ ":" }}"{{ EDID }}"}' \
+           "{{ URL }}"api/enterprise/findEnterpriseDetailsForEdge -o /home/edgeconfig.json
+
+- name: Beautify json file
+  become: yes
+  shell: js-beautify /home/edgeconfig.json > /opt/{{ EID }}.json
+
+- name: Move Conf json to conf path
+  become: yes
+  shell: mv /opt/{{ EID }}.json /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/

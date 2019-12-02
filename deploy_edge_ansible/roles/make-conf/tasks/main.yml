@@ -1,0 +1,63 @@
+---
+# tasks file for make-conf
+- name: Modifying config.cfg Path
+  replace:
+    path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/motion_detection_config.py
+    regexp: './conf/config.cfg'
+    replace: '/opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/config.cfg'
+
+- name: Modifying logging.conf Path
+  replace:
+    path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/utils/globals.py
+    regexp: './conf/logging.conf'
+    replace: '/opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/logging.conf'
+
+# - name: Modifying json conf Path
+#   replace:
+#     path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/utils/globals.py
+#     regexp: './conf/enterpirse201_edge.json'
+#     replace: '/opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/{{ EID }}.json'
+
+- name: Adding log file path in logging.conf
+  replace:
+    path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/logging.conf
+    regexp: '/opt/logs/motion_detection.log'
+    replace: '/opt/{{ INPUT}}_{{ EID[19:24] }}/logs/{{ INPUT}}_{{ EID[19:24] }}.log'
+- name: Commenting cv2 to avoid popups
+  replace:
+    path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/frameExtractors/frameHandler.py
+    regexp: 'cv2.imshow'
+    replace: '#cv2.imshow'
+
+- name: Modifying JSON path
+  shell: sed -i "s#./conf/enterprise201_edge\.json#/opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/{{ EID }}.json#g" /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/utils/globals.py
+
+- name: Adding Bucket name in config json
+  replace:
+    path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/{{ EID }}.json
+    regexp: 'bucket_name'
+    replace: '{{ BK_NAME }}'
+
+- name: Adding the Folder Name in json
+  replace:
+    path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/{{ EID }}.json
+    regexp: 'foldername'
+    replace: '{{ FOLD_NAME }}'
+
+- name: Adding output path
+  replace:
+    path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/{{ EID }}.json
+    regexp: 'motion_detection'
+    replace: '{{ INPUT}}_{{ EID[19:24] }}'
+
+# - name: Adding csv file path
+#   replace:
+#     path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/{{ EID }}.json
+#     regexp: 'motion_detection'
+#     replace: '{{ INPUT}}_{{ EID[19:24] }}'
+
+# - name: Adding temp_dir path
+#   replace:
+#     path: /opt/asva_{{ INPUT}}_{{ EID[19:24] }}/conf/{{ EID }}.json
+#     regexp: '/opt/motion_detection/temp_dir/'
+#     replace: '/opt/{{ INPUT}}_{{ EID[19:24] }}/temp_dir'

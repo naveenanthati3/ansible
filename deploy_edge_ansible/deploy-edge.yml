@@ -1,0 +1,81 @@
+---
+- hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: false
+  vars_files:
+    - vars/vars.yml
+  pre_tasks:
+  - name: Update System
+    become: yes
+    command: apt update
+  - name: Install Dependent Packages
+    apt:
+      name: "{{ req_packs }}"
+      state: present
+      update_cache: yes
+
+  - name: Install CHFG Package to check service status
+    become: yes
+    apt:
+      deb: http://launchpadlibrarian.net/36005381/chkconfig_11.0-79.1-2_all.deb
+
+  - name: Get Info of the Service
+    stat: 'path=/etc/init.d/{{ item }}'
+    register: servicestatus
+    with_items: 
+      - monit
+      - "{{ INPUT}}_{{ EID[19:24] }}"
+      - "{{ INPUT}}_{{ EID[19:24] }}_convert"
+  
+  - name: Stop the Services
+    become: yes
+    service:
+      name: "{{ item }}"
+      state: stopped
+    with_items:
+      - monit
+      - "{{ INPUT}}_{{ EID[19:24] }}"
+      - "{{ INPUT}}_{{ EID[19:24] }}_convert"
+    when: servicestatus.stat.exists == true
+    when: service_exists
+
+- hosts: webservers
+  vars_files:
+    - vars/vars.yml
+  roles:
+    - make-env
+    - env-type
+    - make-proj-env
+    - make-conf
+    - cron-monit
+    - create-serv
+  vars_prompt:
+    - name: "githubuser"
+      prompt: "Enter your github username"
+      private: no
+    - name: "githubpassword"
+      prompt: "Enter your github password"
+      private: yes
+
+- hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: false
+  vars_files:
+    - vars/vars.yml
+  post_tasks:
+  - name: Update the System
+    become: yes
+    apt:
+      update_cache: yes
+
+  - name: Reload the Daemon Services
+    become: yes
+    systemd:
+      daemon_reload: yes
+  - name: Restarting the Monit
+    become: yes
+    service:
+      name: monit
+      state: restarted
