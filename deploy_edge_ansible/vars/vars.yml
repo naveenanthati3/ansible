@@ -5,7 +5,7 @@ SID: 5d95895bcd92521c5115d986
 EDID: 5dbc039606e792a62abb661c
 BRANCH: code_refractor
 SCRIPT_BRANCH: naveen_script_update
-URL: https://ijx4y5usa8.execute-api.us-east-1.amazonaws.com/dev/
+URL: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 req_packs:
 - git
 - s3cmd
