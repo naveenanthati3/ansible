@@ -1,0 +1,26 @@
+---
+# tasks file the removes nginx and uwsgi
+# derived from examples/nginx-remove-playbook
+- name: Ensure nginx service is stopped
+  service:
+    name: nginx
+    state: stopped
+  ignore_errors: yes
+
+- name: Ensure nginx package is removed
+  yum:
+    name: nginx
+    state: absent
+
+- name: Ensure uwsgi is removed
+  pip:
+    name: uwsgi
+    state: absent
+
+- name: Clean up files created by nginx-simple
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/nginx/nginx.conf
+    - /usr/share/nginx/html/index.html

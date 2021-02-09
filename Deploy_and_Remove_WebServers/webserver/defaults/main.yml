@@ -1,0 +1,3 @@
+---
+nginx_test_message: This is a test message
+nginx_webserver_port: 80
