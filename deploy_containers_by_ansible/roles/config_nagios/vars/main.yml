@@ -1,0 +1,6 @@
+---
+monitoring_container_name: nuagebec-ubuntu
+monitoring_container_image: nuagebec/ubuntu
+default_container_command: sleep 1d
+nagios_container_name: nagios-master
+nagios_container_image: tmeralus/nagios

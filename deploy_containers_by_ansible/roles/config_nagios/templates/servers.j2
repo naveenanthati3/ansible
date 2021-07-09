@@ -1,0 +1,12 @@
+define service {
+        use                 generic-service
+        host_name           remotehost
+        service_description check-host-alive
+        check_command       check-host-alive
+}
+define service {
+        use                 generic-service
+        host_name           remotehost
+        service_description SSH
+        check_command       check_ssh
+}

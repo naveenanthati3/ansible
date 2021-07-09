@@ -1,0 +1,60 @@
+---
+- name: Pull Monitor Docker image
+  docker_image:
+    name: "{{ monitoring_container_image }}"
+    source: pull
+
+- name: Pull nagios Docker image
+  docker_image:
+    name: "{{ nagios_container_image }}"
+    source: pull
+
+# Creates the number of containers defined by the variable create_containers, using values from vars file
+- name: Create Monitoring containers
+  docker_container:
+    name: "{{ monitoring_container_name }}"
+    image: "{{ monitoring_container_image }}"
+    command: "{{ default_container_command }}"
+    state: started
+
+- name: Create nagios containers
+  docker_container:
+    name: "{{ nagios_container_name }}"
+    image: "{{ nagios_container_image }}"
+    state: started
+    hostname: nagios
+    published_ports:
+      - 0.0.0.0:80:80
+      - 0.0.0.0:5666:5666
+
+- name: Get infos on container
+  docker_container_info:
+    name: "{{ monitoring_container_name }}"
+  register: result
+
+- name: Print information about container
+  debug:
+    var: result.container.NetworkSettings.IPAddress
+
+- name: Registering monitoring container IP
+  set_fact:
+    monitoring_container_ip: "{{ result.container.NetworkSettings.IPAddress }}"
+
+- name: Copy server configuration to Remote Server
+  template:
+    src: templates/servers.j2
+    dest: /tmp/servers.cfg
+
+- name: Copy host configuration to Remote Server
+  template:
+    src: templates/hosts.j2
+    dest: /tmp/hosts.cfg
+
+- name: Copy Server Configuration to Contianer
+  shell: docker cp /tmp/servers.cfg "{{ nagios_container_name }}":/opt/nagios/etc/monitor/
+
+- name: Copy Server Configuration to Contianer
+  shell: docker cp /tmp/hosts.cfg "{{ nagios_container_name }}":/opt/nagios/etc/monitor/
+
+- name: Restarting Monitoring Docker Container
+  shell: docker restart "{{ nagios_container_name }}"

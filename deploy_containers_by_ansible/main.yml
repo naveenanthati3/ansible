@@ -1,0 +1,8 @@
+---
+- hosts: all
+  become: true
+  become_method: sudo
+
+  roles:
+  - roles/install_docker
+  - roles/config_nagios
